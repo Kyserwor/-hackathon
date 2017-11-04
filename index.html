@@ -7,10 +7,25 @@
 </head>
 <body>
 	<div id="rooms">
-	  <li v-for="entry in message.rooms">
-	  	{{ entry.name }}
-	  </li>
+			<roomlist-room
+				v-for="item in rooms"
+      			v-bind:name="item.name"
+      			v-bind:id="item.id"
+			>
+			</roomlist-room>
+	  <input v-model="roomName">
 	  <button v-on:click="createRoom">Create Room</button>
+	</div>
+	<div id="users">
+	  <li v-for="user in users">
+	  	{{ user.name }}
+	  </li>
+	</div>
+	<div id="messages">
+		<li v-for="message in messages">
+			{{message.create_date}}
+			{{message.message}}
+		</li>
 	</div>
 	<script type="text/javascript" src="script.js"></script>
 </body>
