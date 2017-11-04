@@ -1,5 +1,6 @@
 var selectedRoom = 1;
 var userId = 0;
+var messages = [];
 
 var roomList = new Vue({
   el: '#rooms',
@@ -31,48 +32,12 @@ var roomList = new Vue({
   }
 });
 
-var updateRoomList = function() {
-	$.ajax({
-		url: 'http://localhost:5000/rooms',
-		type: 'GET',
-		dataType: 'json',
-		success: function(res) {
-	  		roomList.rooms = res.data.rooms;
-			console.log(roomList.rooms);
-		}
-	});
-};
-
-updateRoomList();
-
 var userList = new Vue({
   el: '#users',
   data: {
     users: 'Hello Vue!'
   }
 });
-
-var updateUserList = function() {
-	$.ajax({
-		url: 'http://localhost:5000/users/' + selectedRoom,
-		type: 'GET',
-		dataType: 'json',
-		success: function(res) {
-			console.log(res);
-	  		userList.users = res.data.users;
-		}
-	});
-};
-
-var getNamesFromObjectArray = function(array, attribute) {
-	var attributeArray = [];
-	for (entry of array) {
-  		attributeArray.push(entry[attribute]);
-	}
-	return attributeArray;
-}
-
-updateUserList();
 
 Vue.component('roomlist-room', {
   props: ['id', 'name'],
@@ -85,6 +50,45 @@ Vue.component('roomlist-room', {
   	}
   }
 })
+
+var messages = new Vue({
+	el: '#messages',
+	data: {
+		message: '',
+		messages: []
+	},
+	methods: {
+		sendMessage: function() {
+			sendMessageAPI(selectedRoom, userId, this.message);
+			updateMessages();
+			this.message = '';
+		}
+	}
+})
+
+var updateRoomList = function() {
+	$.ajax({
+		url: 'http://localhost:5000/rooms',
+		type: 'GET',
+		dataType: 'json',
+		success: function(res) {
+	  		roomList.rooms = res.data.rooms;
+			console.log(roomList.rooms);
+		}
+	});
+};
+
+var updateUserList = function() {
+	$.ajax({
+		url: 'http://localhost:5000/users/' + selectedRoom,
+		type: 'GET',
+		dataType: 'json',
+		success: function(res) {
+			console.log(res);
+	  		userList.users = res.data.users;
+		}
+	});
+};
 
 var leaveRoom = function() {
 	$.ajax({
@@ -115,15 +119,6 @@ var joinRoom = function() {
 	});	
 }
 
-var messages = [];
-
-var messages = new Vue({
-	el: '#messages',
-	data: {
-		messages: []
-	}
-})
-
 var updateMessages = function() {
 	$.ajax({
 		url: 'http://localhost:5000/chats/' + selectedRoom,
@@ -151,6 +146,30 @@ var createUser = function() {
 	});
 }
 
-createUser();
+var sendMessageAPI = function(roomId, userId, message) {
+	$.ajax({
+		url: 'http://localhost:5000/chats/' + roomId,
+		type: 'POST',
+		data: {
+			user_id: userId,
+			message: message
+		},
+		dataType: 'json',
+		success: function(res) {
+			console.log("message sent");
+		}
+	});
+}
 
+updateUserList();
+updateRoomList();
+createUser();
 updateMessages();
+
+var getNamesFromObjectArray = function(array, attribute) {
+	var attributeArray = [];
+	for (entry of array) {
+  		attributeArray.push(entry[attribute]);
+	}
+	return attributeArray;
+}
